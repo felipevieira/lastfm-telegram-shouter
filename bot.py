@@ -123,6 +123,8 @@ def handle(msg):
         tgram_rmfm(msg)
       elif (message_words[0].replace("/help@lastfm_channel_bot", "/help") == "/help"):
         tgram_help(msg)
+      elif (message_words[0].replace("/github@lastfm_channel_bot", "/github") == "/github"):
+        bot.sendMessage(msg['chat']['id'], "https://github.com/Arcaena/lastfm-telegram-shouter")
 
   fm_db.commit()
 
