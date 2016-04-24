@@ -58,7 +58,7 @@ def tgram_addfm(msg):
         bot.sendMessage(msg['chat']['id'], "somehow that username was already in the watch queue, so no effect. (the username was added successfully; no one else had already claimed it)")
         return
       else:
-        queue[fmname] = dict(scrobbles=0, artist='', track='', username=tgramhandle)
+        queue[fmname] = dict(scrobbles=0, artist='', track='', username=tgramHandle)
       bot.sendMessage(msg['chat']['id'], "username '" + fmname + "' added to the watchlist")
     else:
       bot.sendMessage(msg['chat']['id'], "No valid name found; a valid name is:\n2-15 characters;\nbegins with a letters;\ncontains only letters, numbers, '-' and '_'.")
