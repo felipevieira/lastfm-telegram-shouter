@@ -152,8 +152,6 @@ will eventually support other scrobbling services
 '''
 def lastfmListen():
   
-  # TODO: write my own lastfm wrapper that doesn't drop data
-  
   lastfm = pylast.LastFMNetwork(api_key=fm_API_KEY, api_secret=fm_API_SECRET)
 
   while True:
@@ -161,6 +159,8 @@ def lastfmListen():
     if (queue):
       curUser = queue.popitem(last=False)
       newUserInfo = curUser[1]
+      success = False
+
       print(curUser)
       user = lastfm.get_user(curUser[0])
       user_scrobbles = user.get_playcount()
@@ -179,7 +179,7 @@ def lastfmListen():
         c_title = c_track.title
 
         print(user_scrobbles, c_track)
-        print(curUser[1])
+
         track_prefix = "th"
         track_num = user_scrobbles + 1
         if (10 < (track_num % 100) < 14):
@@ -195,18 +195,17 @@ def lastfmListen():
           pass # timeout hasn't passed yet
         elif (curUser[1].get('artist') != c_artist or curUser[1].get('track') != c_title):
           bot.sendMessage("@last_fm", "User [" + curUser[0] + "](" + userURL + ") is scrobbling their " + str(track_num) + track_prefix + " song: [" + c_title + "](" + c_url + ")  by " + c_artist + ".", parse_mode='Markdown', disable_web_page_preview=True)
-          last_time = time.time()
+          success = True
         else:
           if (curUser[1].get('scrobbles') != user_scrobbles):
             bot.sendMessage("@last_fm", "User [" + curUser[0] + "](" + userURL + ") is scrobbling their " + str(track_num) + track_prefix + " song: [" + c_title + "](" + c_url + ")  by " + c_artist + ".", parse_mode='Markdown', disable_web_page_preview=True)
-            last_time = time.time()
-        
-        newUserInfo['artist'] = c_artist
-        newUserInfo['track'] = c_title
-        newUserInfo['scrobbles'] = user_scrobbles
-        newUserInfo['last post'] = last_time
-
-      queue[curUser[0]] = newUserInfo
+            success = True
+        if (success):
+          newUserInfo['artist'] = c_artist
+          newUserInfo['track'] = c_title
+          newUserInfo['scrobbles'] = user_scrobbles
+          newUserInfo['last post'] = time.time()
+          queue[curUser[0]] = newUserInfo
       time.sleep(1)
 
 bot = telepot.Bot(tgram_API_KEY)
