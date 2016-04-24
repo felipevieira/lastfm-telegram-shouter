@@ -183,7 +183,7 @@ def lastfmListen():
 
         track_prefix = "th"
         track_num = user_scrobbles + 1
-        if (10 < (track_num % 100) < 14:
+        if (10 < (track_num % 100) < 14):
           pass # ignore the 11-13 for prefixes
         elif (track_num % 10 == 1):
           track_prefix = "st"
