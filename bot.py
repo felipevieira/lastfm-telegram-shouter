@@ -155,48 +155,51 @@ def lastfmListen():
   lastfm = pylast.LastFMNetwork(api_key=fm_API_KEY, api_secret=fm_API_SECRET)
 
   while True:
-    curUser = queue.popitem(last=False)
-    newUserInfo = curUser[1]
-    print(curUser)
-    user = lastfm.get_user(curUser[0])
-    user_scrobbles = user.get_playcount()
-    c_track = user.get_now_playing()
-    userHandle = curUser[1].get('username')
     
-    userURL = ""
-    if (userHandle != ''):
-      userURL = "http://telegram.me/" + userHandle
-    else:
-      userURL = "http://www.last.fm/user/" + curUser[0]
-
-    if (c_track):
-      c_url = c_track.get_url()
-      c_artist = c_track.artist.name
-      c_title = c_track.title
-
-      print(user_scrobbles, c_track)
-
-      track_prefix = "th"
-      track_num = user_scrobbles + 1
-      if (track_num % 10 == 1):
-        track_prefix = "st"
-      elif (track_num %10 == 2):
-        track_prefix = "nd"
-      elif (track_num % 10 == 3):
-        track_prefix = "rd"
-
-      if (curUser[1].get('artist') != c_artist or curUser[1].get('track') != c_title):
-        bot.sendMessage("@last_fm", "User [" + curUser[0] + "](" + userURL + ") is scrobbling their " + str(user_scrobbles) + track_prefix + " song: [" + c_title + "](" + c_url + ")  by " + c_artist + ".", parse_mode='Markdown', disable_web_page_preview=True)
+    if (queue):
+    
+      curUser = queue.popitem(last=False)
+      newUserInfo = curUser[1]
+      print(curUser)
+      user = lastfm.get_user(curUser[0])
+      user_scrobbles = user.get_playcount()
+      c_track = user.get_now_playing()
+      userHandle = curUser[1].get('username')
+    
+      userURL = ""
+      if (userHandle != ''):
+        userURL = "http://telegram.me/" + userHandle
       else:
-        if (curUser[1].get('scrobbles') != user_scrobbles):
-          bot.sendMessage("@last_fm", "User [" + curUser[0] + "](" + userURL + ") is scrobbling their " + str(user_scrobbles) + track_prefix + " song: [" + c_title + "](" + c_url + ")  by " + c_artist + ".", parse_mode='Markdown', disable_web_page_preview=True)
-        
-      newUserInfo['artist'] = c_artist
-      newUserInfo['track'] = c_title
-      newUserInfo['scrobbles'] = user_scrobbles
+        userURL = "http://www.last.fm/user/" + curUser[0]
 
-    queue[curUser[0]] = newUserInfo
-    time.sleep(1)
+      if (c_track):
+        c_url = c_track.get_url()
+        c_artist = c_track.artist.name
+        c_title = c_track.title
+
+        print(user_scrobbles, c_track)
+
+        track_prefix = "th"
+        track_num = user_scrobbles + 1
+        if (track_num % 10 == 1):
+          track_prefix = "st"
+        elif (track_num %10 == 2):
+          track_prefix = "nd"
+        elif (track_num % 10 == 3):
+          track_prefix = "rd"
+
+        if (curUser[1].get('artist') != c_artist or curUser[1].get('track') != c_title):
+          bot.sendMessage("@last_fm", "User [" + curUser[0] + "](" + userURL + ") is scrobbling their " + str(user_scrobbles) + track_prefix + " song: [" + c_title + "](" + c_url + ")  by " + c_artist + ".", parse_mode='Markdown', disable_web_page_preview=True)
+        else:
+          if (curUser[1].get('scrobbles') != user_scrobbles):
+            bot.sendMessage("@last_fm", "User [" + curUser[0] + "](" + userURL + ") is scrobbling their " + str(user_scrobbles) + track_prefix + " song: [" + c_title + "](" + c_url + ")  by " + c_artist + ".", parse_mode='Markdown', disable_web_page_preview=True)
+        
+        newUserInfo['artist'] = c_artist
+        newUserInfo['track'] = c_title
+        newUserInfo['scrobbles'] = user_scrobbles
+
+      queue[curUser[0]] = newUserInfo
+      time.sleep(1)
 
 bot = telepot.Bot(tgram_API_KEY)
 
@@ -222,9 +225,6 @@ lock.release()
 
 
 lastfmListen()
-
-while True:
-  time.sleep(0.2)
 
 #except KeyboardInterrupt:
 #  fm_db.commit()
