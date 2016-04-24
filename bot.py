@@ -205,7 +205,7 @@ def lastfmListen():
           newUserInfo['track'] = c_title
           newUserInfo['scrobbles'] = user_scrobbles
           newUserInfo['last post'] = time.time()
-          queue[curUser[0]] = newUserInfo
+      queue[curUser[0]] = newUserInfo
       time.sleep(1)
 
 bot = telepot.Bot(tgram_API_KEY)
