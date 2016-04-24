@@ -194,11 +194,11 @@ def lastfmListen():
         if (curUser[1].get('last post', 0) + 15 > time.time()):
           pass # timeout hasn't passed yet
         elif (curUser[1].get('artist') != c_artist or curUser[1].get('track') != c_title):
-          bot.sendMessage("@last_fm", "User [" + curUser[0] + "](" + userURL + ") is scrobbling their " + str(track_num) + track_prefix + " song: [" + c_title + "](" + c_url + ")  by " + c_artist + ".", parse_mode='Markdown', disable_web_page_preview=True)
+          bot.sendMessage("@last_fm", "User <a href='" + userURL + "'>" +  curUser[0] + "</a> is scrobbling their " + str(track_num) + track_prefix + " song: <a href = '" + c_url + "'>" + c_title + "</a> by " + c_artist + ".", parse_mode='HTML', disable_web_page_preview=True)
           success = True
         else:
           if (curUser[1].get('scrobbles') != user_scrobbles):
-            bot.sendMessage("@last_fm", "User [" + curUser[0] + "](" + userURL + ") is scrobbling their " + str(track_num) + track_prefix + " song: [" + c_title + "](" + c_url + ")  by " + c_artist + ".", parse_mode='Markdown', disable_web_page_preview=True)
+            bot.sendMessage("@last_fm", "User <a href='" + userURL + "'>" +  curUser[0] + "</a> is scrobbling their " + str(track_num) + track_prefix + " song: <a href = '" + c_url + "'>" + c_title + "</a> by " + c_artist + ".", parse_mode='HTML', disable_web_page_preview=True)
             success = True
         if (success):
           newUserInfo['artist'] = c_artist
