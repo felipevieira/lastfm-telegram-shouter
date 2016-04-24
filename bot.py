@@ -189,10 +189,10 @@ def lastfmListen():
           track_prefix = "rd"
 
         if (curUser[1].get('artist') != c_artist or curUser[1].get('track') != c_title):
-          bot.sendMessage("@last_fm", "User [" + curUser[0] + "](" + userURL + ") is scrobbling their " + str(user_scrobbles) + track_prefix + " song: [" + c_title + "](" + c_url + ")  by " + c_artist + ".", parse_mode='Markdown', disable_web_page_preview=True)
+          bot.sendMessage("@last_fm", "User [" + curUser[0] + "](" + userURL + ") is scrobbling their " + str(track_num) + track_prefix + " song: [" + c_title + "](" + c_url + ")  by " + c_artist + ".", parse_mode='Markdown', disable_web_page_preview=True)
         else:
           if (curUser[1].get('scrobbles') != user_scrobbles):
-            bot.sendMessage("@last_fm", "User [" + curUser[0] + "](" + userURL + ") is scrobbling their " + str(user_scrobbles) + track_prefix + " song: [" + c_title + "](" + c_url + ")  by " + c_artist + ".", parse_mode='Markdown', disable_web_page_preview=True)
+            bot.sendMessage("@last_fm", "User [" + curUser[0] + "](" + userURL + ") is scrobbling their " + str(track_num) + track_prefix + " song: [" + c_title + "](" + c_url + ")  by " + c_artist + ".", parse_mode='Markdown', disable_web_page_preview=True)
         
         newUserInfo['artist'] = c_artist
         newUserInfo['track'] = c_title
