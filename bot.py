@@ -191,20 +191,22 @@ def lastfmListen():
         elif (track_num % 10 == 3):
           track_prefix = "rd"
 
-        if (curUser[1].get('last post', 0) + 15 > time.time()):
-          pass # timeout hasn't passed yet
-        elif (curUser[1].get('artist') != c_artist or curUser[1].get('track') != c_title):
+        #TODO: custom wrapper + better checks for if a song is on repeat one
+
+        #if (curUser[1].get('last post', 0) + 15 > time.time()):
+          #pass # timeout hasn't passed yet
+        if (curUser[1].get('artist') != c_artist or curUser[1].get('track') != c_title):
           bot.sendMessage("@last_fm", "User <a href='" + userURL + "'>" +  curUser[0] + "</a> is scrobbling their " + str(track_num) + track_prefix + " song: <a href = '" + c_url + "'>" + c_title + "</a> by " + c_artist + ".", parse_mode='HTML', disable_web_page_preview=True)
           success = True
-        else:
-          if (curUser[1].get('scrobbles') != user_scrobbles):
-            bot.sendMessage("@last_fm", "User <a href='" + userURL + "'>" +  curUser[0] + "</a> is scrobbling their " + str(track_num) + track_prefix + " song: <a href = '" + c_url + "'>" + c_title + "</a> by " + c_artist + ".", parse_mode='HTML', disable_web_page_preview=True)
-            success = True
+        #else:
+          #if (curUser[1].get('scrobbles') != user_scrobbles):
+            #bot.sendMessage("@last_fm", "User <a href='" + userURL + "'>" +  curUser[0] + "</a> is scrobbling their " + str(track_num) + track_prefix + " song: <a href = '" + c_url + "'>" + c_title + "</a> by " + c_artist + ".", parse_mode='HTML', disable_web_page_preview=True)
+            #success = True
         if (success):
           newUserInfo['artist'] = c_artist
           newUserInfo['track'] = c_title
           newUserInfo['scrobbles'] = user_scrobbles
-          newUserInfo['last post'] = time.time()
+          #newUserInfo['last post'] = time.time()
       queue[curUser[0]] = newUserInfo
       time.sleep(1)
 
