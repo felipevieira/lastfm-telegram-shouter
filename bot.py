@@ -162,9 +162,16 @@ def lastfmListen():
       success = False
 
       print(curUser)
-      user = lastfm.get_user(curUser[0])
-      user_scrobbles = user.get_playcount()
-      c_track = user.get_now_playing()
+      c_url = ""
+      try:
+        user = lastfm.get_user(curUser[0])
+        user_scrobbles = user.get_playcount()
+        c_track = user.get_now_playing()
+        if (c_track):
+          c_url = c_track.get_url()
+      except:
+        print("some network thing probably happened and this wrapper tried to kill my program")
+
       userHandle = curUser[1].get('username')
     
       userURL = ""
@@ -174,7 +181,6 @@ def lastfmListen():
         userURL = "http://www.last.fm/user/" + curUser[0]
 
       if (c_track):
-        c_url = c_track.get_url()
         c_artist = c_track.artist.name
         c_title = c_track.title
 
