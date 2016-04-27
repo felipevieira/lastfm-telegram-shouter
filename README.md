@@ -13,3 +13,4 @@ Todo:
 * Make the posted messages prettier (if the link previews showed album art, I'd use that)
 * Potentially say when someone has a song on repeat (maybe only say something every 5 scrobbles to avoid spam / potential duplicate messages)
 * Possibly track artists/albums/tracks for the channel so stats can be posted daily on what's listened to
+* Have the bot edit its last message for that person when their scrobble count remains the same so that there's less spam (i.e. changing songs rapidly)
