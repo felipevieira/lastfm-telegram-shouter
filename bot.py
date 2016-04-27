@@ -7,10 +7,14 @@ import threading
 import time
 import re
 
-
+print(sys.argv)
 tgram_API_KEY = sys.argv[1]
 fm_API_KEY = sys.argv[2]
 fm_API_SECRET = sys.argv[3]
+g_id = 1 # group IDs have to be 0, so
+if (len(sys.argv) > 4):
+  g_id = int(sys.argv[4])
+
 lock = threading.Lock()
 fm_db = sqlite3.connect("fm.db", check_same_thread=False)
 fm_cur = fm_db.cursor()
@@ -202,8 +206,10 @@ def lastfmListen():
         #if (curUser[1].get('last post', 0) + 15 > time.time()):
           #pass # timeout hasn't passed yet
         if (curUser[1].get('artist') != c_artist or curUser[1].get('track') != c_title):
-          bot.sendMessage("@last_fm", "User <a href='" + userURL + "'>" +  curUser[0] + "</a> is scrobbling their " + str(track_num) + track_prefix + " song: <a href = '" + c_url + "'>" + c_title + "</a> by " + c_artist + ".", parse_mode='HTML', disable_web_page_preview=True)
+          m = bot.sendMessage("@last_fm", "User <a href='" + userURL + "'>" +  curUser[0] + "</a> is scrobbling their " + str(track_num) + track_prefix + " song: <a href = '" + c_url + "'>" + c_title + "</a> by " + c_artist + ".", parse_mode='HTML', disable_web_page_preview=True)
           success = True
+          if (g_id < 0):
+            m2 = bot.sendMessage(g_id, "User [" + curUser[0] + "](" + userURL + ") is scrobbling their " + str(track_num) + track_prefix + " song: [" + c_title + "](" + c_url + ") by " + c_artist + ".", parse_mode='Markdown', disable_web_page_preview=True)
         #else:
           #if (curUser[1].get('scrobbles') != user_scrobbles):
             #bot.sendMessage("@last_fm", "User <a href='" + userURL + "'>" +  curUser[0] + "</a> is scrobbling their " + str(track_num) + track_prefix + " song: <a href = '" + c_url + "'>" + c_title + "</a> by " + c_artist + ".", parse_mode='HTML', disable_web_page_preview=True)
