@@ -175,6 +175,8 @@ def lastfmListen():
           c_url = c_track.get_url()
       except:
         print("some network thing probably happened and this wrapper tried to kill my program")
+        queue[curUser[0]] = newUserInfo
+        continue
 
       userHandle = curUser[1].get('username')
     
