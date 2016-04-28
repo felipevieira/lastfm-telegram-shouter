@@ -108,7 +108,8 @@ takes commands:
 def handle(msg):
   content_type, chat_type, chat_id = telepot.glance(msg)
   print(content_type, chat_type, chat_id)
-  
+
+  print(lock)  
   lock.acquire()
   #t_fm_db = sqlite3.connect("fm.db")
   #t_fm_cur = t_fm_db.cursor()
@@ -165,7 +166,7 @@ def lastfmListen():
       newUserInfo = curUser[1]
       success = False
 
-      print(curUser)
+      #print(curUser)
       c_url = ""
       try:
         user = lastfm.get_user(curUser[0])
@@ -190,7 +191,7 @@ def lastfmListen():
         c_artist = c_track.artist.name
         c_title = c_track.title
 
-        print(user_scrobbles, c_track)
+        #print(user_scrobbles, c_track)
 
         track_prefix = "th"
         track_num = user_scrobbles + 1
@@ -210,6 +211,7 @@ def lastfmListen():
         if (curUser[1].get('artist') != c_artist or curUser[1].get('track') != c_title):
           m = bot.sendMessage("@last_fm", "User <a href='" + userURL + "'>" +  curUser[0] + "</a> is scrobbling their " + str(track_num) + track_prefix + " song: <a href = '" + c_url + "'>" + c_title + "</a> by " + c_artist + ".", parse_mode='HTML', disable_web_page_preview=True)
           success = True
+          print(userHandle, c_title)
           if (g_id < 0):
             m2 = bot.sendMessage(g_id, "User <a href='" + userURL + "'>" +  curUser[0] + "</a> is scrobbling their " + str(track_num) + track_prefix + " song: <a href = '" + c_url + "'>" + c_title + "</a> by " + c_artist + ".", parse_mode='HTML', disable_web_page_preview=True)
         #else:
