@@ -22,8 +22,6 @@ queue = collections.OrderedDict()
 # lock immediately so that the lastfm bot can go and build the shared queue first before the telegram bot processes anything
 lock.acquire()
 
-
-
 def tgram_start(msg):
   bot.sendMessage(msg['chat']['id'], "Heya, this bot is the messenger for @last_fm. To get started, send your last.fm name with /addfm [name].", reply_to_message_id=msg['message_id'])
 
@@ -65,20 +63,14 @@ def tgram_addfm(msg):
     else:
       bot.sendMessage(msg['chat']['id'], "No valid name found; a valid name is:\n2-15 characters;\nbegins with a letters;\ncontains only letters, numbers, '-' and '_'.", reply_to_message_id=msg['message_id'])
 
-
 def tgram_rmfm(msg):
-  
-  print('entered removing function')
-
   exists = fm_cur.execute("SELECT user_id, username, lastfm FROM users WHERE user_id=?", (msg['from']['id'],)).fetchone()
 
   if (exists):
     user_id = exists[0]
     username = exists[1]
     fmname = exists[2]
-
     print(exists)
-
     if (fmname in queue):
       del queue[fmname]
 
@@ -87,9 +79,8 @@ def tgram_rmfm(msg):
   else:
     bot.sendMessage(msg['chat']['id'], "No record for you found; are you sure you had an account associated?", reply_to_message_id=msg['message_id'])
 
-
 def tgram_help(msg):
-  bot.sendMessage(msg['chat']['id'], "where is your god now", reply_to_message_id=msg['message_id'])
+  bot.sendMessage(msg['chat']['id'], "Message me with /addfm [your lastfm username] to link your lastfm username to your Telegram user ID.\n\nPlease note you can only link one lastfm account at a time and will need to use /rmfm first before you can link another account.", reply_to_message_id=msg['message_id'])
 
 def tgram_sauce(msg):
   bot.sendMessage(msg['chat']['id'], "https://github.com/arcaena/lastfm-telegram-shouter/", reply_to_message_id=msg['message_id'])
