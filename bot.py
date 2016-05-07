@@ -96,8 +96,10 @@ def tgram_rmfm(ubot, update):
 
 
 def tgram_help(ubot, update):
-  print('trying to print the help!!!!')
   ubot.sendMessage(update.message.chat_id, "where is your god now")
+  
+def tgram_sauce(ubot, update):
+  ubot.sendMessage(update.message.chat_id, "https://github.com/Arcaena/lastfm-telegram-shouter")
 
 
 '''
@@ -196,6 +198,7 @@ u.dispatcher.addHandler(CommandHandler('help', tgram_help))
 u.dispatcher.addHandler(CommandHandler('rmfm', tgram_rmfm))
 u.dispatcher.addHandler(CommandHandler('addfm', tgram_addfm))
 u.dispatcher.addHandler(CommandHandler('start', tgram_start))
+u.dispatcher.addHandler(CommandHandler('github', tgram_sauce))
 
 u.start_polling()
 
