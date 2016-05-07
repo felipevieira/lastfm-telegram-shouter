@@ -14,30 +14,30 @@ fm_API_SECRET = sys.argv[3]
 g_id = int(sys.argv[4])
 
 lock = threading.Lock()
-fm_db = sqlite3.connect("fm.db", check_same_thread=False)
+fm_db = sqlite3.connect("fm" + str(g_id) + ".db", check_same_thread=False)
 fm_cur = fm_db.cursor()
 fm_cur.execute('CREATE TABLE IF NOT EXISTS users (user_id INTEGER PRIMARY KEY, username TEXT, lastfm TEXT NOT     NULL)')
 fm_db.commit()
 queue = collections.OrderedDict()
 # lock immediately so that the lastfm bot can go and build the shared queue first before the telegram bot processes anything
-lock.acquire() 
+lock.acquire()
 
 
 
 def tgram_start(msg):
-  bot.sendMessage(msg['chat']['id'], "Heya, this bot is the messenger for @last_fm. To get started, send your last.fm name with /addfm [name].")
+  bot.sendMessage(msg['chat']['id'], "Heya, this bot is the messenger for @last_fm. To get started, send your last.fm name with /addfm [name].", reply_to_message_id=msg['message_id'])
 
 def tgram_addfm(msg):
   '''Your username should be between 2 and 15 characters, begin with a letter and contain only letters, numbers, '_' or '-'.'''
   exists = fm_cur.execute("SELECT user_id FROM users WHERE user_id=?", (msg['from']['id'],)).fetchone()
 
   if (exists):
-    bot.sendMessage(msg['chat']['id'], "Sorry, but you'll need to go remove your associated name with /rmfm first before you can add one (might support multiple accounts in the future)")
+    bot.sendMessage(msg['chat']['id'], "Sorry, but you'll need to go remove your associated name with /rmfm first before you can add one (might support multiple accounts in the future)", reply_to_message_id=msg['message_id'])
   else:
-    result = re.match('^/addfm ([a-zA-Z][a-zA-Z0-9_-]{1,14})$', msg['text'].replace('@lastfm_channel_bot', ''))
-  
+    result = re.match('^/addfm(@.*)? ([a-zA-Z][a-zA-Z0-9_-]{1,14})$', msg['text'])
+
     if (result != None):
-      fmname = result.group(1)
+      fmname = result.group(2)
       fmname_exists = fm_cur.execute("SELECT username FROM users WHERE lastfm=?", (fmname,)).fetchone()
 
       if (fmname_exists):
@@ -46,7 +46,7 @@ def tgram_addfm(msg):
           username = "@" + fmname_exists[0]
         else:
           username = "a user with no @ handle"
-        bot.sendMessage("The given lastfm username is already in the database, and was added by " + username + ". If you believe this was in error, then contact the user, or if you cannot, contact @PandorasFox")
+        bot.sendMessage("The given lastfm username is already in the database, and was added by " + username + ". If you believe this was in error, then contact the user, or if you cannot, contact @PandorasFox", reply_to_message_id=msg['message_id'])
         return
 
       tgramHandle = ""
@@ -57,16 +57,19 @@ def tgram_addfm(msg):
 
       if (fmname in queue):
         print("somehow this guy was already in the queue")
-        bot.sendMessage(msg['chat']['id'], "somehow that username was already in the watch queue, so no effect. (the username was added successfully; no one else had already claimed it)")
+        bot.sendMessage(msg['chat']['id'], "somehow that username was already in the watch queue, so no effect. (the username was added successfully; no one else had already claimed it)", reply_to_message_id=msg['message_id'])
         return
       else:
         queue[fmname] = dict(scrobbles=0, artist='', track='', username=tgramHandle)
-      bot.sendMessage(msg['chat']['id'], "username '" + fmname + "' added to the watchlist")
+      bot.sendMessage(msg['chat']['id'], "username '" + fmname + "' added to the watchlist", reply_to_message_id=msg['message_id'])
     else:
-      bot.sendMessage(msg['chat']['id'], "No valid name found; a valid name is:\n2-15 characters;\nbegins with a letters;\ncontains only letters, numbers, '-' and '_'.")
-     
+      bot.sendMessage(msg['chat']['id'], "No valid name found; a valid name is:\n2-15 characters;\nbegins with a letters;\ncontains only letters, numbers, '-' and '_'.", reply_to_message_id=msg['message_id'])
+
 
 def tgram_rmfm(msg):
+  
+  print('entered removing function')
+
   exists = fm_cur.execute("SELECT user_id, username, lastfm FROM users WHERE user_id=?", (msg['from']['id'],)).fetchone()
 
   if (exists):
@@ -80,13 +83,16 @@ def tgram_rmfm(msg):
       del queue[fmname]
 
     fm_cur.execute("DELETE FROM users WHERE user_id=?", (msg['from']['id'],))
-    bot.sendMessage(msg['chat']['id'], "Removed from watchlist successfully.")
+    bot.sendMessage(msg['chat']['id'], "Removed from watchlist successfully.", reply_to_message_id=msg['message_id'])
   else:
-    bot.sendMessage(msg['chat']['id'], "No record for you found; are you sure you had an account associated?")
+    bot.sendMessage(msg['chat']['id'], "No record for you found; are you sure you had an account associated?", reply_to_message_id=msg['message_id'])
 
 
 def tgram_help(msg):
-  bot.sendMessage(msg['chat']['id'], "where is your god now")
+  bot.sendMessage(msg['chat']['id'], "where is your god now", reply_to_message_id=msg['message_id'])
+
+def tgram_sauce(msg):
+  bot.sendMessage(msg['chat']['id'], "https://github.com/arcaena/lastfm-telegram-shouter/", reply_to_message_id=msg['message_id'])
 
 '''
 handles a message sent to @lastfm_channel_bot
@@ -107,18 +113,19 @@ def handle(msg):
   content_type, chat_type, chat_id = telepot.glance(msg)
   print(content_type, chat_type, chat_id)
 
-  print(lock)  
   lock.acquire()
+  print(' lock acquired')
+
   #t_fm_db = sqlite3.connect("fm.db")
   #t_fm_cur = t_fm_db.cursor()
-  
+
   if (content_type == 'text'):
     message_words = msg['text'].strip().lower().split()
-    
+
     if (msg['text'][0] != "/"):
       return
     else:
-      if (message_words[0] == "/start"):
+      if (message_words[0] == "/start" and chat_type == 'private'):
         tgram_start(msg)
       elif (message_words[0].replace("/addfm@lastfm_channel_bot", "/addfm") == "/addfm"):
         tgram_addfm(msg)
@@ -127,7 +134,7 @@ def handle(msg):
       elif (message_words[0].replace("/help@lastfm_channel_bot", "/help") == "/help"):
         tgram_help(msg)
       elif (message_words[0].replace("/github@lastfm_channel_bot", "/github") == "/github"):
-        bot.sendMessage(msg['chat']['id'], "https://github.com/Arcaena/lastfm-telegram-shouter")
+        tgram_sauce(msg)
 
   fm_db.commit()
 
@@ -135,7 +142,7 @@ def handle(msg):
   #t_fm_db.close()
 
   lock.release()
-
+  print(" lock released")
 '''kicks off the telegram bot thread'''
 
 def tgram_bot():
@@ -145,7 +152,7 @@ def tgram_bot():
 the lastfm listener thread. It needs to init (build a queue from the db),
   then start its checks, with waits of 400ms between each
   needs to get a person's recently played, and if they are currently playing, get their # scrobbles
-  needs to wait 200ms after each call since i dont think the api wrapper does that itself 
+  needs to wait 200ms after each call since i dont think the api wrapper does that itself
     (need to do a custom wrapper with this...)
   when sending a message to the group, it should:
     "@username is now scrobbling xxx by zzz!" or "[...] their 111st song, [xxx] by [zzz]!"
@@ -154,11 +161,8 @@ the lastfm listener thread. It needs to init (build a queue from the db),
 will eventually support other scrobbling services
 '''
 def lastfmListen():
-  
   lastfm = pylast.LastFMNetwork(api_key=fm_API_KEY, api_secret=fm_API_SECRET)
-
   while True:
-    
     if (queue):
       curUser = queue.popitem(last=False)
       newUserInfo = curUser[1]
@@ -178,7 +182,6 @@ def lastfmListen():
         continue
 
       userHandle = curUser[1].get('username')
-    
       userURL = ""
       if (userHandle != ''):
         userURL = "http://telegram.me/" + userHandle
@@ -204,25 +207,28 @@ def lastfmListen():
 
         #TODO: custom wrapper + better checks for if a song is on repeat one
 
-        #if (curUser[1].get('last post', 0) + 15 > time.time()):
-          #pass # timeout hasn't passed yet
-        if (curUser[1].get('artist') != c_artist or curUser[1].get('track') != c_title):
+        m = None
+
+        if (curUser[1].get('scrobbles') != user_scrobbles):
           m = bot.sendMessage(g_id, "User <a href='" + userURL + "'>" +  curUser[0] + "</a> is scrobbling their " + str(track_num) + track_prefix + " song: <a href = '" + c_url + "'>" + c_title + "</a> by " + c_artist + ".", parse_mode='HTML', disable_web_page_preview=True)
-          #m = bot.sendMessage("@last_fm", "User <a href='" + userURL + "'>" +  curUser[0] + "</a> is scrobbling their " + str(track_num) + track_prefix + " song: <a href = '" + c_url + "'>" + c_title + "</a> by " + c_artist + ".", parse_mode='HTML', disable_web_page_preview=True)
           success = True
-          print(userHandle, c_title)
-          #if (g_id < 0):
-        #else:
-          #if (curUser[1].get('scrobbles') != user_scrobbles):
-            #bot.sendMessage("@last_fm", "User <a href='" + userURL + "'>" +  curUser[0] + "</a> is scrobbling their " + str(track_num) + track_prefix + " song: <a href = '" + c_url + "'>" + c_title + "</a> by " + c_artist + ".", parse_mode='HTML', disable_web_page_preview=True)
-            #success = True
+        elif (curUser[1].get('artist') != c_artist or curUser[1].get('track') != c_title):
+          m_id = curUser[1].get('m_id')
+          m = bot.editMessageText((g_id, m_id), "User <a href='" + userURL + "'>" +  curUser[0] + "</a> is scrobbling their " + str(track_num) + track_prefix + " song: <a href = '" + c_url + "'>" + c_title + "</a> by " + c_artist + ".", parse_mode='HTML', disable_web_page_preview=True)
+          success = True
         if (success):
           newUserInfo['artist'] = c_artist
           newUserInfo['track'] = c_title
           newUserInfo['scrobbles'] = user_scrobbles
-          #newUserInfo['last post'] = time.time()
+          newUserInfo['m_id'] = m['message_id']
       queue[curUser[0]] = newUserInfo
-      time.sleep(1)
+      try:
+        time.sleep(1)
+      except KeyboardInterrupt:
+        print("cleaning up...")
+        fm_db.commit()
+        fm_db.close()
+        sys.exit()
 
 bot = telepot.Bot(tgram_API_KEY)
 
