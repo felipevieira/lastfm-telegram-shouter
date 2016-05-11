@@ -1,0 +1,1 @@
+VIEW_MODE="lastfm" # ["lastfm", "spotify"]

@@ -6,6 +6,8 @@ import collections # queue won't suffice since I need an easy way to remove thin
 import threading
 import time
 import re
+import spotipy
+import config
 
 print(sys.argv)
 tgram_API_KEY = sys.argv[1]
@@ -19,6 +21,7 @@ fm_cur = fm_db.cursor()
 fm_cur.execute('CREATE TABLE IF NOT EXISTS users (user_id INTEGER PRIMARY KEY, username TEXT, lastfm TEXT NOT     NULL)')
 fm_db.commit()
 queue = collections.OrderedDict()
+sp = spotipy.Spotify()
 # lock immediately so that the lastfm bot can go and build the shared queue first before the telegram bot processes anything
 lock.acquire()
 
@@ -32,7 +35,7 @@ def tgram_addfm(msg):
   if (exists):
     bot.sendMessage(msg['chat']['id'], "Sorry, but you'll need to go remove your associated name with /rmfm first before you can add one (might support multiple accounts in the future)", reply_to_message_id=msg['message_id'])
   else:
-    result = re.match('^/addfm(@.*)? ([a-zA-Z][a-zA-Z0-9_-]{1,14})$', msg['text'])
+    result = re.match('^/addfm(@.*)? ([a-zA-Z_][a-zA-Z0-9_-]{1,14})$', msg['text'])
 
     if (result != None):
       fmname = result.group(2)
@@ -183,6 +186,21 @@ def lastfmListen():
         c_artist = c_track.artist.name
         c_title = c_track.title
 
+        info_from_spotify = False
+
+        if config.VIEW_MODE == "spotify":
+          try:
+            song_url_results = sp.search(q='%s %s' % (c_artist, c_track.title), limit=20)
+            # if spotify api doesn't return results to the full track name, remove info (live, etc.)
+            if len(song_url_results['tracks']['items']) < 1:
+              song_url_results = sp.search(q='%s %s' % (c_artist, c_track.title.split("-")[0]), limit=20)
+            c_url = song_url_results['tracks']['items'][0]["external_urls"]["spotify"]
+            c_artist_url = song_url_results['tracks']['items'][0]["artists"][0]["external_urls"]["spotify"]
+            info_from_spotify = True
+          except:
+            info_from_spotify = False
+
+
         #print(user_scrobbles, c_track)
 
         track_prefix = "th"
@@ -201,12 +219,19 @@ def lastfmListen():
         m = None
 
         if (curUser[1].get('scrobbles') != user_scrobbles):
-          m = bot.sendMessage(g_id, "User <a href='" + userURL + "'>" +  curUser[0] + "</a> is scrobbling their " + str(track_num) + track_prefix + " song: <a href = '" + c_url + "'>" + c_title + "</a> by " + c_artist + ".", parse_mode='HTML', disable_web_page_preview=True)
+          if config.VIEW_MODE == "spotify" and info_from_spotify:
+            m = bot.sendMessage(g_id, "User @%s (%s) is listening to <a href='%s'>%s</a> by <a href='%s'>%s</a>" % (userHandle, curUser[0], c_url, c_title, c_artist_url, c_artist), parse_mode='HTML')
+          else:
+            m = bot.sendMessage(g_id, "User <a href='" + userURL + "'>" +  curUser[0] + "</a> is scrobbling their " + str(track_num) + track_prefix + " song: <a href = '" + c_url + "'>" + c_title + "</a> by " + c_artist + ".", parse_mode='HTML', disable_web_page_preview=True)
           success = True
         elif (curUser[1].get('artist') != c_artist or curUser[1].get('track') != c_title):
           m_id = curUser[1].get('m_id')
-          m = bot.editMessageText((g_id, m_id), "User <a href='" + userURL + "'>" +  curUser[0] + "</a> is scrobbling their " + str(track_num) + track_prefix + " song: <a href = '" + c_url + "'>" + c_title + "</a> by " + c_artist + ".", parse_mode='HTML', disable_web_page_preview=True)
+          if config.VIEW_MODE == "spotify" and info_from_spotify:
+            m = bot.editMessageText((g_id, m_id), "User @%s (%s) is listening to <a href='%s'>%s</a> by <a href='%s'>%s</a>" % (userHandle, curUser[0], c_url, c_title, c_artist_url, c_artist), parse_mode='HTML')
+          else:
+            m = bot.editMessageText((g_id, m_id), "User <a href='" + userURL + "'>" +  curUser[0] + "</a> is scrobbling their " + str(track_num) + track_prefix + " song: <a href = '" + c_url + "'>" + c_title + "</a> by " + c_artist + ".", parse_mode='HTML', disable_web_page_preview=True)
           success = True
+
         if (success):
           newUserInfo['artist'] = c_artist
           newUserInfo['track'] = c_title
