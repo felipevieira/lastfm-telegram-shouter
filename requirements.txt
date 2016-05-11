@@ -1,0 +1,6 @@
+pylast==1.6.0
+requests==2.10.0
+six==1.10.0
+spotipy==2.3.8
+telepot==7.1
+wheel==0.26.0
