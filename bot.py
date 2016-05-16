@@ -9,7 +9,6 @@ import re
 import spotipy
 import config
 
-print(sys.argv)
 tgram_API_KEY = sys.argv[1]
 fm_API_KEY = sys.argv[2]
 fm_API_SECRET = sys.argv[3]
@@ -198,6 +197,7 @@ def lastfmListen():
             c_artist_url = song_url_results['tracks']['items'][0]["artists"][0]["external_urls"]["spotify"]
             info_from_spotify = True
           except:
+            # if no spotify info is available, use lastfm preview mode as fallback
             info_from_spotify = False
 
 
@@ -220,14 +220,14 @@ def lastfmListen():
 
         if (curUser[1].get('scrobbles') != user_scrobbles):
           if config.VIEW_MODE == "spotify" and info_from_spotify:
-            m = bot.sendMessage(g_id, "User %s (%s) is listening to <a href='%s'>%s</a> by <a href='%s'>%s</a>" % (userHandle, curUser[0], c_url, c_title, c_artist_url, c_artist), parse_mode='HTML')
+            m = bot.sendMessage(g_id, "User %s is listening to <a href='%s'>%s</a> by <a href='%s'>%s</a> according to their Last.FM account <a href='http://www.last.fm/user/%s'>%s</a> " % (userHandle, c_url, c_title, c_artist_url, c_artist, curUser[0], curUser[0]), parse_mode='HTML')
           else:
             m = bot.sendMessage(g_id, "User <a href='" + userURL + "'>" +  curUser[0] + "</a> is scrobbling their " + str(track_num) + track_prefix + " song: <a href = '" + c_url + "'>" + c_title + "</a> by " + c_artist + ".", parse_mode='HTML', disable_web_page_preview=True)
           success = True
         elif (curUser[1].get('artist') != c_artist or curUser[1].get('track') != c_title):
           m_id = curUser[1].get('m_id')
           if config.VIEW_MODE == "spotify" and info_from_spotify:
-            m = bot.editMessageText((g_id, m_id), "User %s (%s) is listening to <a href='%s'>%s</a> by <a href='%s'>%s</a>" % (userHandle, curUser[0], c_url, c_title, c_artist_url, c_artist), parse_mode='HTML')
+            m = bot.editMessageText((g_id, m_id), "User %s is listening to <a href='%s'>%s</a> by <a href='%s'>%s</a> according to their Last.FM account <a href='http://www.last.fm/user/%s'>%s</a> " % (userHandle, c_url, c_title, c_artist_url, c_artist, curUser[0], curUser[0]), parse_mode='HTML')
           else:
             m = bot.editMessageText((g_id, m_id), "User <a href='" + userURL + "'>" +  curUser[0] + "</a> is scrobbling their " + str(track_num) + track_prefix + " song: <a href = '" + c_url + "'>" + c_title + "</a> by " + c_artist + ".", parse_mode='HTML', disable_web_page_preview=True)
           success = True
