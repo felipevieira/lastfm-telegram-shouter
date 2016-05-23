@@ -50,18 +50,19 @@ def tgram_addfm(msg):
         return
 
       tgramHandle = ""
-      if msg['from']['username']:
-        tgramHandle=msg['from']['username']
-        fm_cur.execute("INSERT INTO users values(?,?,?)", (msg['from']['id'], tgramHandle, fmname))
-      fm_db.commit() # t_fm_db.commit()
+      if "username" in msg["from"]:
+        if msg['from']['username']:
+          tgramHandle=msg['from']['username']
+          fm_cur.execute("INSERT INTO users values(?,?,?)", (msg['from']['id'], tgramHandle, fmname))
+        fm_db.commit() # t_fm_db.commit()
 
-      if (fmname in queue):
-        print("somehow this guy was already in the queue")
-        bot.sendMessage(msg['chat']['id'], "somehow that username was already in the watch queue, so no effect. (the username was added successfully; no one else had already claimed it)", reply_to_message_id=msg['message_id'])
-        return
-      else:
-        queue[fmname] = dict(scrobbles=0, artist='', track='', username=tgramHandle)
-      bot.sendMessage(msg['chat']['id'], "username '" + fmname + "' added to the watchlist", reply_to_message_id=msg['message_id'])
+        if (fmname in queue):
+          print("somehow this guy was already in the queue")
+          bot.sendMessage(msg['chat']['id'], "somehow that username was already in the watch queue, so no effect. (the username was added successfully; no one else had already claimed it)", reply_to_message_id=msg['message_id'])
+          return
+        else:
+          queue[fmname] = dict(scrobbles=0, artist='', track='', username=tgramHandle)
+        bot.sendMessage(msg['chat']['id'], "username '" + fmname + "' added to the watchlist", reply_to_message_id=msg['message_id'])
     else:
       bot.sendMessage(msg['chat']['id'], "No valid name found; a valid name is:\n2-15 characters;\nbegins with a letters;\ncontains only letters, numbers, '-' and '_'.", reply_to_message_id=msg['message_id'])
 
