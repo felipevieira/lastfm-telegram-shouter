@@ -32,7 +32,10 @@ def tgram_addfm(msg):
   exists = fm_cur.execute("SELECT user_id FROM users WHERE user_id=?", (msg['from']['id'],)).fetchone()
 
   if (exists):
-    bot.sendMessage(msg['chat']['id'], "Sorry, but you'll need to go remove your associated name with /rmfm first before you can add one (might support multiple accounts in the future)", reply_to_message_id=msg['message_id'])
+    try:
+      bot.sendMessage(msg['chat']['id'], "Sorry, but you'll need to go remove your associated name with /rmfm first before you can add one (might support multiple accounts in the future)", reply_to_message_id=msg['message_id'])
+    except:
+      pass
   else:
     result = re.match('^/addfm(@.*)? ([a-zA-Z_][a-zA-Z0-9_-]{1,14})$', msg['text'])
 
