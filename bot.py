@@ -117,6 +117,7 @@ def handle(msg):
     message_words = msg['text'].strip().lower().split()
 
     if (msg['text'][0] != "/"):
+      lock.release()
       return
     else:
       if (message_words[0] == "/start" and chat_type == 'private'):
